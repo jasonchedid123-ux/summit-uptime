@@ -1,0 +1,21 @@
+name: keepalive
+
+# GitHub switches off timers in public repos after 60 days with no activity.
+# Once a month this re-enables the uptime workflow through the API (no commit).
+on:
+  schedule:
+    - cron: "17 6 1 * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: re-enable uptime
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/uptime.yml/enable"
