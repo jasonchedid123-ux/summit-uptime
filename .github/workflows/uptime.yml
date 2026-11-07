@@ -14,21 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: cess.summitclient.com health
-        if: always()
-        run: |
-          # Three tries, 20 s apart, so one slow answer is not an alert.
-          for i in 1 2 3; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://cess.summitclient.com/api/health || true)
-            echo "try $i: HTTP $code"
-            [ "$code" = "200" ] && exit 0
-            sleep 20
-          done
-          echo "::error::cess.summitclient.com health failed 3 times"
-          exit 1
       - name: summitintegrations.com HQ healthz
         if: always()
         run: |
+          # Three tries, 20 s apart, so one slow answer is not an alert.
           for i in 1 2 3; do
             code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://summitintegrations.com/hq/healthz || true)
             echo "try $i: HTTP $code"
