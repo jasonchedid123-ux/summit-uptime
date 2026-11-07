@@ -15,6 +15,7 @@ jobs:
     timeout-minutes: 3
     steps:
       - name: cess.summitclient.com health
+        if: always()
         run: |
           # Three tries, 20 s apart, so one slow answer is not an alert.
           for i in 1 2 3; do
@@ -24,4 +25,37 @@ jobs:
             sleep 20
           done
           echo "::error::cess.summitclient.com health failed 3 times"
+          exit 1
+      - name: summitintegrations.com HQ healthz
+        if: always()
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://summitintegrations.com/hq/healthz || true)
+            echo "try $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          echo "::error::summitintegrations.com/hq/healthz failed 3 times"
+          exit 1
+      - name: summitintegrations.com home
+        if: always()
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://summitintegrations.com/ || true)
+            echo "try $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          echo "::error::summitintegrations.com/ failed 3 times"
+          exit 1
+      - name: summitclient.com home
+        if: always()
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://summitclient.com/ || true)
+            echo "try $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          echo "::error::summitclient.com/ failed 3 times"
           exit 1
